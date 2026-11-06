@@ -26,7 +26,6 @@ public class BookingService : IBookingService
     private readonly IServiceRepository _serviceRepo;
     private readonly IUserRepository _userRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ISlotService _slotService;
     private readonly ILogger<BookingService> _logger;
 
     public BookingService(
@@ -35,7 +34,6 @@ public class BookingService : IBookingService
         IServiceRepository serviceRepo,
         IUserRepository userRepo,
         IUnitOfWork unitOfWork,
-        ISlotService slotService,
         ILogger<BookingService> logger)
     {
         _bookingRepo = bookingRepo;
@@ -43,7 +41,6 @@ public class BookingService : IBookingService
         _serviceRepo = serviceRepo;
         _userRepo = userRepo;
         _unitOfWork = unitOfWork;
-        _slotService = slotService;
         _logger = logger;
     }
 
@@ -113,9 +110,6 @@ public class BookingService : IBookingService
             await _unitOfWork.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            // Evict slot lookup cache
-            _slotService.InvalidateSlotCache(slot.ProviderId, slot.Date);
-
             _logger.LogInformation("Successfully created Booking {BookingId} for User {UserId} on Slot {SlotId}",
                 booking.Id, customerUserId, slot.Id);
 
@@ -126,14 +120,12 @@ public class BookingService : IBookingService
         {
             await transaction.RollbackAsync(ct);
             _logger.LogWarning(ex, "Concurrency conflict: Slot {SlotId} was booked concurrently by another user.", slot.Id);
-            _slotService.InvalidateSlotCache(slot.ProviderId, slot.Date);
             throw new ConflictException("This slot was just booked by another user. Please choose a different slot.");
         }
         catch (DbUpdateException ex)
         {
             await transaction.RollbackAsync(ct);
             _logger.LogWarning(ex, "Database constraint violation while booking slot {SlotId}.", slot.Id);
-            _slotService.InvalidateSlotCache(slot.ProviderId, slot.Date);
             throw new ConflictException("This slot is no longer available. Please select another slot.");
         }
     }
@@ -184,7 +176,6 @@ public class BookingService : IBookingService
             booking.Slot.IsBooked = false;
             booking.Slot.ConcurrencyStamp = Guid.NewGuid();
             await _slotRepo.UpdateAsync(booking.Slot, ct);
-            _slotService.InvalidateSlotCache(booking.Slot.ProviderId, booking.Slot.Date);
         }
 
         await _bookingRepo.UpdateAsync(booking, ct);
@@ -235,7 +226,6 @@ public class BookingService : IBookingService
             {
                 booking.Slot.IsBooked = false;
                 booking.Slot.ConcurrencyStamp = Guid.NewGuid();
-                _slotService.InvalidateSlotCache(booking.Slot.ProviderId, booking.Slot.Date);
             }
         }
 

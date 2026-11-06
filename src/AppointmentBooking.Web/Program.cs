@@ -2,7 +2,6 @@ using AppointmentBooking.Application.Services;
 using AppointmentBooking.Core.Interfaces;
 using AppointmentBooking.Infrastructure.Data;
 using AppointmentBooking.Infrastructure.Repositories;
-using AppointmentBooking.Web.BackgroundServices;
 using AppointmentBooking.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -49,9 +48,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
-// Memory Cache for Slot Lookups
-builder.Services.AddMemoryCache();
-
 // Dependency Injection - Repositories & Unit of Work
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
@@ -65,9 +61,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISlotService, SlotService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
-
-// Background Service - Automatic Expiry of Pending Bookings
-builder.Services.AddHostedService<BookingExpiryService>();
 
 var app = builder.Build();
 
