@@ -1,0 +1,179 @@
+@model ProviderDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Provider.BusinessName} - Book an Appointment";
+    var defaultDateStr = Model.InitialDate.ToString("yyyy-MM-dd");
+}
+
+<input type="hidden" id="providerId" value="@Model.Provider.Id" />
+<input type="hidden" id="selectedServiceId" value="@(Model.PreselectedServiceId?.ToString() ?? "")" />
+<input type="hidden" id="selectedSlotId" value="" />
+
+<!-- Provider Header Banner -->
+<div class="custom-card p-4 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary px-3 py-1 rounded-pill">@Model.Provider.Category</span>
+                <span class="text-success small fw-semibold">&#9679; Accepting Appointments</span>
+            </div>
+            <h2 class="fw-bold mb-2">@Model.Provider.BusinessName</h2>
+            <p class="text-muted mb-2">@Model.Provider.Description</p>
+            <div class="d-flex flex-wrap gap-3 text-muted small">
+                <span>&#128205; @(Model.Provider.Address ?? "Address on file")</span>
+                <span>&#128222; @(Model.Provider.ContactPhone ?? "Verified phone")</span>
+                <span>&#128231; @Model.Provider.OwnerEmail</span>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a asp-controller="Providers" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                &larr; Back to Directory
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Double-Booking Conflict Notification Banner -->
+<div id="conflictAlert" class="alert alert-danger alert-dismissible fade show shadow-sm" style="display: none;" role="alert">
+    <div class="d-flex align-items-center">
+        <span class="fs-4 me-3">&#9888;&#65039;</span>
+        <div>
+            <strong class="d-block">Concurrency Conflict Detected!</strong>
+            <span id="conflictAlertMessage">This slot was just booked by another user. Please choose a different slot.</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Step 1: Select Service -->
+    <div class="col-lg-5">
+        <div class="custom-card p-4 h-100">
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-primary rounded-circle p-2 me-2">1</span>
+                <h5 class="fw-bold mb-0">Select a Service</h5>
+            </div>
+            <p class="text-muted small">Choose the service you want to schedule with @Model.Provider.BusinessName:</p>
+
+            <div class="services-list mt-3">
+                @if (Model.Services.Count == 0)
+                {
+                    <div class="text-center py-4 text-muted">
+                        <p>No active services listed at this moment.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var s in Model.Services)
+                    {
+                        var isSelected = Model.PreselectedServiceId == s.Id;
+                        <div class="service-option-card @(isSelected ? "selected" : "")"
+                             data-service-id="@s.Id"
+                             data-service-name="@s.Name"
+                             data-service-price="@s.Price">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="fw-bold mb-1">@s.Name</h6>
+                                    <p class="text-muted small mb-1">@s.Description</p>
+                                    <span class="badge bg-secondary-subtle text-secondary small">&#9201; 30 minutes</span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fs-5 fw-bold text-primary">&#8377;@s.Price.ToString("N0")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Select Date & Available 30-min Slot -->
+    <div class="col-lg-7">
+        <div class="custom-card p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary rounded-circle p-2 me-2">2</span>
+                    <h5 class="fw-bold mb-0">Select Date &amp; Time Slot</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <label for="appointmentDate" class="small fw-semibold text-muted mb-0">Date:</label>
+                    <input type="date" id="appointmentDate" class="form-control form-control-sm"
+                           value="@defaultDateStr" min="@DateTime.UtcNow.ToString("yyyy-MM-dd")" style="width: auto;" />
+                </div>
+            </div>
+
+            <p class="text-muted small mb-2">
+                Fixed 30-minute intervals between <strong>09:00 AM and 05:00 PM</strong>. Slots update live:
+            </p>
+
+            <div class="d-flex gap-3 mb-3 small text-muted">
+                <span><span class="badge bg-white text-dark border me-1">&#9633;</span> Available</span>
+                <span><span class="badge bg-primary text-white me-1">&#9632;</span> Selected</span>
+                <span><span class="badge bg-light text-muted border text-decoration-line-through me-1">&#9633;</span> Booked</span>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="slotLoading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                <span class="ms-2 text-muted small">Loading slot availability...</span>
+            </div>
+
+            <!-- Empty slots message -->
+            <div id="noSlotsMessage" class="alert alert-info py-3 text-center" style="display: none;">
+                No slots configured for this date. Please select another date.
+            </div>
+
+            <!-- Slot Grid (16 slots/day) -->
+            <div id="slotGridContainer" class="slot-grid">
+                <!-- Dynamically populated via booking.js from /api/slots/all -->
+            </div>
+
+            <!-- Step 3: Booking Summary & Confirmation Form -->
+            <div id="bookingSummaryCard" class="mt-4 pt-3 border-top">
+                <form id="bookingForm">
+                    @Html.AntiForgeryToken()
+
+                    <h6 class="fw-bold mb-3">&#128221; Appointment Summary</h6>
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Service:</span>
+                                <strong id="summaryServiceName">Please select a service above</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Total Due:</span>
+                                <strong id="summaryPrice" class="text-primary fs-5">&#8377;0</strong>
+                            </div>
+                            <div class="col-sm-12 mt-2">
+                                <span class="text-muted small d-block">Reserved Time:</span>
+                                <strong id="summarySlotTime">None selected</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customerNotes" class="form-label small fw-semibold">Notes / Special Instructions (Optional):</label>
+                        <textarea id="customerNotes" class="form-control" rows="2" placeholder="e.g. Any symptoms, styling preferences, or questions..."></textarea>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <button type="submit" id="confirmBookingBtn" class="btn btn-primary w-100 py-2 fw-bold shadow-sm" disabled>
+                            Confirm Appointment
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning py-2 small d-flex justify-content-between align-items-center mb-0">
+                            <span>Please sign in to confirm this booking.</span>
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" class="btn btn-primary btn-sm fw-bold">Sign In to Book</a>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/booking.js" asp-append-version="true"></script>
+}

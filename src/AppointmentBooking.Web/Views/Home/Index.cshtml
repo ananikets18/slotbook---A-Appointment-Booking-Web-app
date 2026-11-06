@@ -1,0 +1,91 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Book Appointments with Service Providers";
+}
+
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-bold mb-3">Enterprise Appointment Platform</span>
+            <h1 class="display-4 mb-3">Effortless Scheduling for Clinics, Salons &amp; Tutors</h1>
+            <p class="lead mb-4">Book verified 30-minute time slots in real time. Zero double-booking risk guaranteed by database-level concurrency and instant locking.</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a asp-controller="Providers" asp-action="Index" class="btn btn-light btn-lg px-4 text-primary fw-bold shadow-sm">
+                    Browse All Providers
+                </a>
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4 fw-bold">
+                        Join as Provider
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Filter Pills -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold mb-1">Featured Service Providers</h3>
+        <p class="text-muted mb-0">Select a category to filter top clinics, hair salons, and certified tutors.</p>
+    </div>
+    <div class="mt-2 mt-md-0">
+        <a asp-controller="Home" asp-action="Index" class="category-pill @(string.IsNullOrEmpty(Model.SelectedCategory) ? "active" : "")">
+            All Categories
+        </a>
+        @foreach (var cat in Model.Categories)
+        {
+            <a asp-controller="Home" asp-action="Index" asp-route-category="@cat"
+               class="category-pill @(Model.SelectedCategory == cat ? "active" : "")">
+                @cat
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Providers Grid -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+    @if (Model.FeaturedProviders.Count == 0)
+    {
+        <div class="col-12 text-center py-5">
+            <p class="text-muted fs-5">No providers found in this category.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">View All Providers</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var provider in Model.FeaturedProviders)
+        {
+            <div class="col">
+                <div class="custom-card h-100 d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill fw-semibold">
+                            @provider.Category
+                        </span>
+                        <span class="text-success small fw-semibold">&#9679; Available Slots</span>
+                    </div>
+
+                    <h4 class="fw-bold mb-2">@provider.BusinessName</h4>
+                    <p class="text-muted small mb-3 flex-grow-1">
+                        @(provider.Description != null && provider.Description.Length > 110 
+                            ? provider.Description.Substring(0, 110) + "..." 
+                            : provider.Description ?? "Certified service professional ready to accept bookings.")
+                    </p>
+
+                    <div class="border-top pt-3 mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-3 text-muted small">
+                            <span>&#128205; @(provider.Address ?? "Multiple Locations")</span>
+                            <span>&#128222; @(provider.ContactPhone ?? "Verified Contact")</span>
+                        </div>
+                        <a asp-controller="Providers" asp-action="Details" asp-route-id="@provider.Id"
+                           class="btn btn-primary w-100 fw-semibold">
+                            Book Appointment &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,106 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create an Account";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="custom-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <span class="fs-1">&#128100;</span>
+                <h2 class="fw-bold mt-2">Create an Account</h2>
+                <p class="text-muted">Register to book appointments or offer your professional services</p>
+            </div>
+
+            <form asp-controller="Account" asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label fw-semibold">Full Name</label>
+                    <input asp-for="FullName" class="form-control" placeholder="e.g. Rahul Sharma" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label fw-semibold">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="+91 98200 12345" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                        <input asp-for="Password" class="form-control" placeholder="At least 6 characters" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Repeat password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">I want to:</label>
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Role" value="@UserRole.Customer" id="roleCustomer" checked onchange="toggleProviderFields()" />
+                            <label class="form-check-label" for="roleCustomer">
+                                Book appointments as a <strong>Customer</strong>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Role" value="@UserRole.Provider" id="roleProvider" onchange="toggleProviderFields()" />
+                            <label class="form-check-label" for="roleProvider">
+                                Provide services as a <strong>Provider</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conditional Provider Details -->
+                <div id="providerFields" class="p-3 bg-light rounded border mb-3" style="display: none;">
+                    <h6 class="fw-bold mb-3 text-primary">Provider Profile Details</h6>
+                    <div class="mb-2">
+                        <label asp-for="BusinessName" class="form-label small fw-semibold">Business or Clinic Name</label>
+                        <input asp-for="BusinessName" class="form-control" placeholder="e.g. Arogya Wellness Clinic" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Category" class="form-label small fw-semibold">Service Category</label>
+                        <select asp-for="Category" class="form-select">
+                            <option value="Clinic">Clinic / Healthcare</option>
+                            <option value="Salon">Salon / Beauty / Spa</option>
+                            <option value="Tutor">Tutor / Academic &amp; Tech</option>
+                            <option value="General">Other Professional Service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Complete Registration</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-muted small mb-0">Already registered? <a asp-controller="Account" asp-action="Login" class="fw-semibold text-primary">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleProviderFields() {
+            const isProvider = document.getElementById('roleProvider').checked;
+            document.getElementById('providerFields').style.display = isProvider ? 'block' : 'none';
+        }
+    </script>
+}

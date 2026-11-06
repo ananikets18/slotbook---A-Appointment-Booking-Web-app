@@ -1,0 +1,224 @@
+/* Modern Clean Styling for Appointment Booking Platform (No Tailwind) */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #475569;
+    --success-color: #16a34a;
+    --warning-color: #ca8a04;
+    --danger-color: #dc2626;
+    --bg-light: #f8fafc;
+    --card-border: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+}
+
+body, button, input, select, textarea {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-size: 1.35rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+    color: #ffffff;
+    padding: 4rem 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25);
+    margin-bottom: 3rem;
+}
+
+.hero-section h1 {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: 0.92;
+}
+
+/* Category Filter Badges */
+.category-pill {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50rem;
+    background-color: #ffffff;
+    color: var(--primary-color);
+    border: 1px solid var(--card-border);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.category-pill:hover,
+.category-pill.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Cards */
+.custom-card {
+    background: #ffffff;
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.custom-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header-clean {
+    background: #ffffff;
+    border-bottom: 1px solid var(--card-border);
+    padding: 1.25rem 1.5rem;
+    font-weight: 700;
+}
+
+/* Slot Calendar Grid */
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.slot-btn {
+    padding: 0.65rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    text-align: center;
+    border: 1.5px solid #cbd5e1;
+    background-color: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    user-select: none;
+}
+
+.slot-btn:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: #eff6ff;
+    color: var(--primary-color);
+}
+
+.slot-btn.selected {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+.slot-btn:disabled,
+.slot-btn.booked {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* Service Selection Cards */
+.service-option-card {
+    border: 1.5px solid var(--card-border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.service-option-card:hover {
+    border-color: var(--primary-color);
+    background-color: #f8fafc;
+}
+
+.service-option-card.selected {
+    border-color: var(--primary-color);
+    background-color: #eff6ff;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Quick Fill Demo Badges on Login page */
+.quick-fill-btn {
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px dashed var(--primary-color);
+    background-color: #eff6ff;
+    color: var(--primary-color);
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    transition: background 0.15s ease;
+}
+
+.quick-fill-btn:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* Sticky booking summary footer */
+.booking-summary-box {
+    background-color: #ffffff;
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Footer */
+footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--card-border);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    color: var(--text-muted);
+}

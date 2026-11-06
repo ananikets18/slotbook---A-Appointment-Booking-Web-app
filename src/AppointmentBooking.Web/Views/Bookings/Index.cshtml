@@ -1,0 +1,99 @@
+@model BookingListViewModel
+@{
+    ViewData["Title"] = "My Appointments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">My Appointments</h2>
+        <p class="text-muted mb-0">View your scheduled bookings, status updates, and cancellation options.</p>
+    </div>
+    <div>
+        <a asp-controller="Providers" asp-action="Index" class="btn btn-primary fw-semibold">
+            + Book New Appointment
+        </a>
+    </div>
+</div>
+
+<!-- Status Filter Pills -->
+<div class="mb-4">
+    <a asp-action="Index" class="category-pill @(string.IsNullOrEmpty(Model.StatusFilter) ? "active" : "")">All</a>
+    <a asp-action="Index" asp-route-status="Pending" class="category-pill @(Model.StatusFilter == "Pending" ? "active" : "")">Pending</a>
+    <a asp-action="Index" asp-route-status="Confirmed" class="category-pill @(Model.StatusFilter == "Confirmed" ? "active" : "")">Confirmed</a>
+    <a asp-action="Index" asp-route-status="Completed" class="category-pill @(Model.StatusFilter == "Completed" ? "active" : "")">Completed</a>
+    <a asp-action="Index" asp-route-status="Cancelled" class="category-pill @(Model.StatusFilter == "Cancelled" ? "active" : "")">Cancelled</a>
+</div>
+
+@if (Model.Bookings.Count == 0)
+{
+    <div class="custom-card p-5 text-center">
+        <div class="display-3 text-muted mb-3">&#128197;</div>
+        <h4 class="fw-bold">No appointments found</h4>
+        <p class="text-muted mb-4">You have no scheduled bookings matching this filter.</p>
+        <a asp-controller="Providers" asp-action="Index" class="btn btn-primary px-4 fw-semibold">Find a Provider Now</a>
+    </div>
+}
+else
+{
+    <div class="custom-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">Date &amp; Time</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col">Service</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.Bookings)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">@b.SlotDate.ToString("ddd, dd MMM yyyy")</div>
+                                <div class="text-muted small">@b.StartTime.ToString("hh:mm tt") - @b.EndTime.ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@b.ProviderName</div>
+                            </td>
+                            <td>
+                                <div>@b.ServiceName</div>
+                                @if (!string.IsNullOrEmpty(b.CustomerNotes))
+                                {
+                                    <div class="text-muted small text-truncate" style="max-width: 200px;" title="@b.CustomerNotes">
+                                        Note: @b.CustomerNotes
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <span class="fw-bold text-primary">&#8377;@b.TotalPrice.ToString("N0")</span>
+                            </td>
+                            <td>
+                                <span class="badge @b.StatusBadgeClass badge-status">@b.Status</span>
+                                @if (b.Status == BookingStatus.Cancelled && !string.IsNullOrEmpty(b.CancellationReason))
+                                {
+                                    <div class="text-danger small mt-1" style="max-width: 180px;">@b.CancellationReason</div>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-outline-secondary btn-sm">Details</a>
+                                    @if (b.CanCancel)
+                                    {
+                                        <form asp-action="Cancel" asp-route-id="@b.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this appointment? Your slot will be released.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

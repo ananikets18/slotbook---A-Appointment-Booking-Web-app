@@ -1,0 +1,139 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Management Portal";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="fw-bold mb-0">Platform Administration</h2>
+            <span class="badge bg-danger">Admin Portal</span>
+        </div>
+        <p class="text-muted mb-0">System-wide monitoring &bull; Provider Management &bull; Cross-Tenant Appointments</p>
+    </div>
+    <div>
+        <a href="/swagger" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold">
+            &#128269; Open Swagger API Explorer &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Admin Metrics Cards -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+    <div class="col">
+        <div class="custom-card p-3 text-center border-start border-4 border-primary">
+            <span class="text-muted small fw-semibold text-uppercase">Total Users</span>
+            <div class="fs-3 fw-bold text-primary mt-1">@Model.TotalUsers</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="custom-card p-3 text-center border-start border-4 border-info">
+            <span class="text-muted small fw-semibold text-uppercase">Providers</span>
+            <div class="fs-3 fw-bold text-info mt-1">@Model.TotalProviders</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="custom-card p-3 text-center border-start border-4 border-warning">
+            <span class="text-muted small fw-semibold text-uppercase">Total Bookings</span>
+            <div class="fs-3 fw-bold text-warning mt-1">@Model.TotalBookings</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="custom-card p-3 text-center border-start border-4 border-success">
+            <span class="text-muted small fw-semibold text-uppercase">Confirmed / Active</span>
+            <div class="fs-3 fw-bold text-success mt-1">@Model.ConfirmedBookings</div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="custom-card p-3 text-center border-start border-4 border-dark">
+            <span class="text-muted small fw-semibold text-uppercase">Completed Volume</span>
+            <div class="fs-3 fw-bold text-dark mt-1">&#8377;@Model.TotalPlatformVolume.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Active Providers Overview -->
+    <div class="col-lg-5">
+        <div class="custom-card h-100">
+            <div class="card-header-clean d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Registered Providers</h5>
+                <span class="badge bg-primary">@Model.Providers.Count</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-3">Provider</th>
+                            <th scope="col">Category</th>
+                            <th scope="col" class="text-end pe-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.Providers)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-bold">@p.BusinessName</div>
+                                    <div class="text-muted small">@p.OwnerName &bull; @p.OwnerEmail</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@p.Category</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <span class="badge @(p.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(p.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- System-wide Recent Bookings -->
+    <div class="col-lg-7">
+        <div class="custom-card h-100">
+            <div class="card-header-clean d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Platform Recent Appointments</h5>
+                <span class="text-muted small">All tenants</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-3">Date &amp; Time</th>
+                            <th scope="col">Provider &bull; Service</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col" class="text-end pe-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.RecentBookings)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-bold">@b.SlotDate.ToString("dd MMM yyyy")</div>
+                                    <div class="text-muted small">@b.StartTime.ToString("hh:mm tt")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@b.ProviderName</div>
+                                    <div class="text-muted small">@b.ServiceName (&#8377;@b.TotalPrice.ToString("N0"))</div>
+                                </td>
+                                <td>
+                                    <div>@b.CustomerName</div>
+                                    <div class="text-muted small">@b.CustomerEmail</div>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <span class="badge @b.StatusBadgeClass badge-status">@b.Status</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

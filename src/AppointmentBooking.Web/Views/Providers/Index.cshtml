@@ -1,0 +1,77 @@
+@model ProviderListViewModel
+@{
+    ViewData["Title"] = "Service Providers Directory";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">Service Providers</h2>
+        <p class="text-muted mb-0">Browse certified clinics, salons, and tutoring academies ready for appointment booking.</p>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="custom-card p-3 mb-4">
+    <form method="get" asp-controller="Providers" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <input type="text" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Search by name, description, or keyword..." />
+        </div>
+        <div class="col-md-4">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    <option value="@cat" selected="@(Model.SelectedCategory == cat ? "selected" : null)">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1 fw-semibold">Filter</button>
+            <a asp-controller="Providers" asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Providers Grid -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    @if (Model.Providers.Count == 0)
+    {
+        <div class="col-12 text-center py-5">
+            <div class="display-4 text-muted mb-3">&#128269;</div>
+            <h4 class="fw-bold">No providers match your search</h4>
+            <p class="text-muted">Try adjusting your filters or search keywords.</p>
+            <a asp-controller="Providers" asp-action="Index" class="btn btn-outline-primary mt-2">Clear Filters</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var p in Model.Providers)
+        {
+            <div class="col">
+                <div class="custom-card h-100 d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill fw-semibold">
+                            @p.Category
+                        </span>
+                        <span class="text-muted small">&#128100; @p.OwnerName</span>
+                    </div>
+
+                    <h4 class="fw-bold mb-2">@p.BusinessName</h4>
+                    <p class="text-muted small mb-3 flex-grow-1">
+                        @(p.Description ?? "Providing specialized high-quality services with flexible 30-minute time slots.")
+                    </p>
+
+                    <div class="border-top pt-3 mt-auto">
+                        <div class="small text-muted mb-3">
+                            <div class="mb-1">&#128205; @(p.Address ?? "Address on file")</div>
+                            <div>&#128222; @(p.ContactPhone ?? "Direct phone available")</div>
+                        </div>
+                        <a asp-controller="Providers" asp-action="Details" asp-route-id="@p.Id" class="btn btn-primary w-100 fw-semibold">
+                            Select Service &amp; Book &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

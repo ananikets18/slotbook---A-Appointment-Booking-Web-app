@@ -1,0 +1,79 @@
+@model ManageServicesViewModel
+@{
+    ViewData["Title"] = "Manage Services";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Manage Services Catalog</h2>
+        <p class="text-muted mb-0">Configure the services and pricing your customers can book.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">&larr; Back to Dashboard</a>
+</div>
+
+<div class="row g-4">
+    <!-- Active Services List -->
+    <div class="col-lg-7">
+        <div class="custom-card p-4">
+            <h5 class="fw-bold mb-3">Current Services</h5>
+            @if (Model.Services.Count == 0)
+            {
+                <div class="text-center py-4 text-muted">
+                    <p>No services defined yet. Use the form on the right to add your first service.</p>
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var s in Model.Services)
+                    {
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h6 class="fw-bold mb-0">@s.Name</h6>
+                                    @if (!s.IsActive)
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </div>
+                                <p class="text-muted small mb-1">@s.Description</p>
+                                <span class="badge bg-light text-muted border">&#9201; @s.DurationMinutes min standard slot</span>
+                            </div>
+                            <div class="text-end ps-3">
+                                <span class="fs-5 fw-bold text-primary d-block">&#8377;@s.Price.ToString("N0")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Add New Service Form -->
+    <div class="col-lg-5">
+        <div class="custom-card p-4">
+            <h5 class="fw-bold mb-3">+ Add New Service</h5>
+            <form asp-action="AddService" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Service Name</label>
+                    <input type="text" name="Name" class="form-control" placeholder="e.g. Dental Cleaning &amp; Polish" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Description</label>
+                    <textarea name="Description" class="form-control" rows="3" placeholder="Explain what is included in this service..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Price (&#8377; INR)</label>
+                    <input type="number" step="50" min="50" name="Price" class="form-control" placeholder="500" required />
+                    <small class="text-muted">Standard slot duration is fixed to 30 minutes.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Add Service to Catalog</button>
+            </form>
+        </div>
+    </div>
+</div>
